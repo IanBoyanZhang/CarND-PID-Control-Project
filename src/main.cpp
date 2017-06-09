@@ -36,19 +36,22 @@ int main(int argc, const char *argv[])
   /*************************************************************************
    * Initialize PID Coefficients
    *************************************************************************/
+  double _Kp = 0.0;
+  double _Ki = 1.0;
+  double _Kd = 0.0;
+
   if (argc != 4) {
     cout << "Now running with default parameters" << endl;
-    cout << "Kp: 0.0, Ki: 1.0, Kd:0.0" << endl;
-    pid.Init(0.0, 1.0, 0.0);
   } else {
-    double _Kp = strtod(argv[1], NULL);
-    double _Ki = strtod(argv[2], NULL);
-    double _Kd = strtod(argv[3], NULL);
-    pid.Init(_Kp, _Ki, _Kd);
-    cout << "Kp: " << _Kp << endl;
-    cout << "Ki: " << _Ki << endl;
-    cout << "Kd: " << _Kd << endl;
+    _Kp = strtod(argv[1], NULL);
+    _Ki = strtod(argv[2], NULL);
+    _Kd = strtod(argv[3], NULL);
   }
+  pid.Init(_Kp, _Ki, _Kd);
+  cout << "Kp: " << _Kp << endl;
+  cout << "Ki: " << _Ki << endl;
+  cout << "Kd: " << _Kd << endl;
+
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
