@@ -1,7 +1,11 @@
 # CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+
 
 ---
+Reading List
+---
+
+[PID tunning when process dynamics varies](http://techteach.no/presentations/tekna_olje_gass_04/lecture/documents/adaptive_controller.pdf)
 
 ## Dependencies
 
