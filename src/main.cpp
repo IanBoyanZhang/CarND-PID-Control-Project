@@ -52,6 +52,8 @@ int main(int argc, const char *argv[])
   cout << "Ki: " << _Ki << endl;
   cout << "Kd: " << _Kd << endl;
 
+  bool cte_init = false;
+
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -75,6 +77,13 @@ int main(int argc, const char *argv[])
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+
+          if (!cte_init) {
+            pid.InitCTE(cte);
+            ct_init = true;
+          }
+
+          // What can we do with speed, steering angle values?
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
