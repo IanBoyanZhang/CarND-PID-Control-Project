@@ -12,6 +12,8 @@ public:
   double i_error;
   double d_error;
 
+
+
   /*
   * Coefficients
   */ 
@@ -36,6 +38,8 @@ public:
 
   void InitCTE(double cte);
 
+  void InitPotentialChange(double dKd, double dKi, double dKp);
+
   /*
   * Update the PID error variables given cross track error.
   */
@@ -48,13 +52,34 @@ public:
 
   double Control(double scalar);
 
+  double GetAccuError();
+
+  /**
+   * Setting tolerance
+   * @param tol
+   * @return
+   */
+  double Twiddle(double tol);
+
 private:
-  double prev_cte;
+  double _prev_cte;
+  /**
+   * Accumulative factor over complete run
+   */
+  double _accu_error_sq;
+
+  unsigned int _step_count;
+
+  double _dKp;
+  double _dKi;
+  double _dKd;
 
   // Maximum and minimum allowable integrator state
-  double iMax;
+  double _iMax;
 
-  double iMin;
+  double _iMin;
+
+  double _store_error();
 };
 
 #endif /* PID_H */

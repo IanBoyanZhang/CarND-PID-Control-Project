@@ -33,6 +33,8 @@ int main(int argc, const char *argv[])
 
   PID pid;
 
+  PID pid_speed;
+
   /*************************************************************************
    * Initialize PID Coefficients
    *************************************************************************/
@@ -40,17 +42,37 @@ int main(int argc, const char *argv[])
   double _Ki = 1.0;
   double _Kd = 0.0;
 
-  if (argc != 4) {
+  // Speed controller
+  double _Kp_s = 0.0;
+  double _Ki_s = 0.0;
+  double _Kd_s = 0.0;
+
+  // MPH from simulator
+  double target_speed = 30;
+
+  if (argc != 8) {
     cout << "Now running with default parameters" << endl;
   } else {
     _Kp = strtod(argv[1], NULL);
     _Ki = strtod(argv[2], NULL);
     _Kd = strtod(argv[3], NULL);
+/*    _Kp_s = strtod(argv[4], NULL);
+    _Ki_s = strtod(argv[5], NULL);
+    _Kd_s = strtod(argv[6], NULL);
+
+    target_speed = strtod(argv[7], NULL);*/
   }
   pid.Init(_Kp, _Ki, _Kd);
+
   cout << "Kp: " << _Kp << endl;
   cout << "Ki: " << _Ki << endl;
   cout << "Kd: " << _Kd << endl;
+
+/*  pid_speed.Init(_Kp_s, _Ki_s, _Kd_s);
+
+  cout << "Kp_s: " << _Kp_s << endl;
+  cout << "Ki_s: " << _Ki_s << endl;
+  cout << "Kd_s: " << _Kd_s << endl;*/
 
   bool cte_init = false;
 
@@ -79,10 +101,15 @@ int main(int argc, const char *argv[])
 
           if (!cte_init) {
             pid.InitCTE(cte);
-            ct_init = true;
+            cte_init = true;
           }
 
-          // What can we do with speed, steering angle values?
+          pid.UpdateError(cte);
+          steer_value = pid.Control(1);
+
+          /**
+           * TODO: Steer value clamping
+           */
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
