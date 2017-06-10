@@ -46,8 +46,15 @@ public:
   */
   double TotalError();
 
+  double Control(double scalar);
+
 private:
   double prev_cte;
+
+  // Maximum and minimum allowable integrator state
+  double iMax;
+
+  double iMin;
 };
 
 #endif /* PID_H */
