@@ -16,7 +16,6 @@ void PID::Init(double Kp, double Ki, double Kd) {
 
   _accu_error_sq = 0;
   _step_count = 0;
-  _twiddle_iter = 0;
   _best_ever_mse = numeric_limits<double>::max();
   _prev_cte = 0;
 

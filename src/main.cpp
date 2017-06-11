@@ -35,6 +35,7 @@ unsigned int STEPS_THRESHOLD = 500;
 double prev_time;
 double curr_time;
 double tol = 0.2;
+bool use_twiddle = false;
 
 void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
   std::string msg("42[\"reset\", {}]");
@@ -67,8 +68,6 @@ int main(int argc, const char *argv[])
 
   // MPH from simulator
   double target_speed = 30;
-
-  bool use_twiddle = false;
 
   if (argc != 9) {
     cout << "Now running with default parameters" << endl;
@@ -142,7 +141,7 @@ int main(int argc, const char *argv[])
           /*************************************************************************
            * Twiddle Loop
            *************************************************************************/
-/*          if (step_counter >= STEPS_THRESHOLD) {
+          if (use_twiddle && step_counter >= STEPS_THRESHOLD) {
             pid.Twiddle(tol, pid.GetMSE());
             vector<double> p_vector = pid.GetP();
             vector<double> dp_vector = pid.GetDp();
@@ -157,7 +156,7 @@ int main(int argc, const char *argv[])
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
             }
-          }*/
+          }
           step_counter += 1;
 
           // DEBUG
