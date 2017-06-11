@@ -47,8 +47,11 @@ public:
 
   double Control(double scalar);
 
-  double GetMSE();
+  double Next();
 
+  void SetP(double Kp, double Ki, double Kd);
+
+  double GetMSE();
   /**
    * Setting tolerance
    * @param tol
@@ -56,16 +59,11 @@ public:
    */
   double Twiddle(double tol, double mse);
 
-  double Next();
-
   bool ReachMinima();
 
   vector<double> GetP();
 
   vector<double> GetDp();
-
-  void SetP(double Kp, double Ki, double Kd);
-
 private:
   /*
    * Errors
