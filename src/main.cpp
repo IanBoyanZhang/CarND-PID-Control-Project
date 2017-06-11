@@ -37,6 +37,8 @@ double curr_time;
 double tol = 0.2;
 bool use_twiddle = false;
 
+double best_mse_so_far = numeric_limits<double>::max();
+
 void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
   std::string msg("42[\"reset\", {}]");
   ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
@@ -146,18 +148,28 @@ int main(int argc, const char *argv[])
             vector<double> p_vector = pid.GetP();
             vector<double> dp_vector = pid.GetDp();
             if (!pid.ReachMinima()) {
-              step_counter = 0;
               pid.Init(p_vector[0], p_vector[1], p_vector[2]);
               pid.InitPotentialChange(dp_vector[0], dp_vector[1], dp_vector[2]);
+              step_counter = 0;
               // reset simulator
               resetSimulator(ws);
             } else {
+              // Reach Minima
               std::cout << "Reach minima -> P" << p_vector[0] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
+
+              if (pid.GetMSE() > best_mse_so_far) {
+                // reset pid twiddle with other initial guess
+                pid.Init(_Kp, _Ki, _Kd);
+                pid.InitPotentialChange(_Kp_s, _Ki_s, _Kd_s);
+              }
             }
           }
+
           step_counter += 1;
+
+          cout << "MSE: " << pid.GetMSE() << endl;
 
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
