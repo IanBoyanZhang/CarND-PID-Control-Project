@@ -10,6 +10,8 @@ Reading List and references
 
 [How measure dt in simulator](https://discussions.udacity.com/t/how-to-make-the-pid-output-normalized-to-be-within-1-1/252173/5)
 
+[Application and Analysis of a Robust Trajectory Tracking Controller for Under-Characterized Autonomous Vehicles](http://www.meloneewise.com/wp-content/uploads/2015/08/trajectory_paper.pdf)
+
 ## Dependencies
 
 * cmake >= 3.5

@@ -2,6 +2,7 @@
 #include <ctime>
 #include "json.hpp"
 #include "PID.h"
+#include "SimplePI.h"
 
 // for convenience
 using json = nlohmann::json;
@@ -37,7 +38,26 @@ double curr_time;
 double tol = 0.2;
 bool use_twiddle = false;
 
+// MPH from simulator
+double MAX_SPEED = 80;
+double target_speed = 30;
+
 double best_mse_so_far = numeric_limits<double>::max();
+
+
+
+// Initial Params combo
+/*double _Kp = 0.2;
+double _Ki = 0.3;
+double _Kd = 0.004;*/
+
+double _Kp = 0.15;
+double _Ki = 0.25;
+double _Kd = 0.004;
+
+// Speed controller
+double _Kp_s = 0.1;
+double _Ki_s = 0.002;
 
 void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
   std::string msg("42[\"reset\", {}]");
@@ -54,24 +74,12 @@ int main(int argc, const char *argv[])
 
   PID pid;
 
-  PID pid_speed;
-
+  SimplePI simplePI;
   /*************************************************************************
    * Initialize PID Coefficients
    *************************************************************************/
-  double _Kp = 0.2;
-  double _Ki = 0.3;
-  double _Kd = 0.004;
 
-  // Speed controller
-  double _Kp_s = 0.0;
-  double _Ki_s = 0.0;
-  double _Kd_s = 0.0;
-
-  // MPH from simulator
-  double target_speed = 30;
-
-  if (argc != 9) {
+  if (argc != 8) {
     cout << "Now running with default parameters" << endl;
   } else {
     _Kp = strtod(argv[1], NULL);
@@ -79,11 +87,10 @@ int main(int argc, const char *argv[])
     _Kd = strtod(argv[3], NULL);
 /*    _Kp_s = strtod(argv[4], NULL);
     _Ki_s = strtod(argv[5], NULL);
-    _Kd_s = strtod(argv[6], NULL);
 
-    target_speed = strtod(argv[7], NULL);
+    target_speed = strtod(argv[6], NULL);
     // True non zero
-    use_twiddle = strtod(argv[8], NULL);
+    use_twiddle = strtod(argv[7], NULL);
     */
   }
   pid.Init(_Kp, _Ki, _Kd);
@@ -93,15 +100,16 @@ int main(int argc, const char *argv[])
   cout << "Ki: " << _Ki << endl;
   cout << "Kd: " << _Kd << endl;
 
-/*  pid_speed.Init(_Kp_s, _Ki_s, _Kd_s);
+  simplePI.Init(_Kp_s, _Ki_s);
+  simplePI.SetDesired(target_speed);
 
+/*
   cout << "Kp_s: " << _Kp_s << endl;
-  cout << "Ki_s: " << _Ki_s << endl;
-  cout << "Kd_s: " << _Kd_s << endl;*/
+  cout << "Ki_s: " << _Ki_s << endl;*/
 
   prev_time = clock();
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &simplePI](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -116,7 +124,7 @@ int main(int argc, const char *argv[])
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
-          double steer_value;
+          double steer_value = 0;
           /*
           * TODO: Calculate steering value here, remember the steering value is
           * [-1, 1].
@@ -125,7 +133,7 @@ int main(int argc, const char *argv[])
           */
 
           /*************************************************************************
-           * PID control
+           * PID steering control
            *************************************************************************/
           curr_time = clock();
           double dt = getTimeDiff(prev_time, curr_time);
@@ -139,9 +147,26 @@ int main(int argc, const char *argv[])
           pid.UpdateError(cte, dt);
           steer_value = pid.Control(1);
           pid.Next();
+          /*************************************************************************
+           * PI speed control control
+           *************************************************************************/
+          target_speed = MAX_SPEED * (1 - steer_value);
+          simplePI.SetDesired(target_speed);
+          double throttle_value = simplePI.Control(speed);
+          cout << "Speed" << speed << endl;
+          cout << "throttle_value" << throttle_value << endl;
 
           /*************************************************************************
-           * Twiddle Loop
+           * Bang Bang Control
+           * In Final submission we are using this
+           *************************************************************************/
+          if (fabs(steer_value) >= 0.40) {
+            throttle_value = -  0.7 * steer_value;
+          } else {
+            throttle_value = 1;
+          }
+          /*************************************************************************
+           * Steering Twiddle Loop
            *************************************************************************/
           if (use_twiddle && step_counter >= STEPS_THRESHOLD) {
             pid.Twiddle(tol, pid.GetMSE());
@@ -162,7 +187,7 @@ int main(int argc, const char *argv[])
               if (pid.GetMSE() > best_mse_so_far) {
                 // reset pid twiddle with other initial guess
                 pid.Init(_Kp, _Ki, _Kd);
-                pid.InitPotentialChange(_Kp_s, _Ki_s, _Kd_s);
+                pid.InitPotentialChange(0.9, 0.9, 0.9);
               }
             }
           }
@@ -176,7 +201,8 @@ int main(int argc, const char *argv[])
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          // msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle_value;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
