@@ -76,6 +76,12 @@ int main(int argc, const char *argv[])
 
   bool cte_init = false;
 
+  /**
+   * Twiddle loop
+   */
+
+
+
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -101,12 +107,16 @@ int main(int argc, const char *argv[])
 
           if (!cte_init) {
             pid.InitCTE(cte);
+            pid.InitPotentialChange(1, 1, 1);
             cte_init = true;
           }
 
           pid.UpdateError(cte);
           steer_value = pid.Control(1);
 
+          // Do twiddle
+
+          // next
           /**
            * TODO: Steer value clamping
            */

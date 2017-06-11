@@ -1,11 +1,14 @@
 # CarND-Controls-PID
 
 
+
 ---
-Reading List
+Reading List and references
 ---
 
 [PID tunning when process dynamics varies](http://techteach.no/presentations/tekna_olje_gass_04/lecture/documents/adaptive_controller.pdf)
+
+[How measure dt in simulator](https://discussions.udacity.com/t/how-to-make-the-pid-output-normalized-to-be-within-1-1/252173/5)
 
 ## Dependencies
 

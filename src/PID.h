@@ -1,6 +1,9 @@
 #ifndef PID_H
 #define PID_H
 
+#include <vector>
+#include <numeric>
+
 using namespace std;
 
 class PID {
@@ -12,14 +15,12 @@ public:
   double i_error;
   double d_error;
 
-
-
   /*
   * Coefficients
   */ 
-  double Kp;
+  /*double Kp;
   double Ki;
-  double Kd;
+  double Kd;*/
 
   /*
   * Constructor
@@ -38,7 +39,7 @@ public:
 
   void InitCTE(double cte);
 
-  void InitPotentialChange(double dKd, double dKi, double dKp);
+  void InitPotentialChange(double dKp, double dKi, double dKd);
 
   /*
   * Update the PID error variables given cross track error.
@@ -52,14 +53,16 @@ public:
 
   double Control(double scalar);
 
-  double GetAccuError();
+  double GetMSE();
 
   /**
    * Setting tolerance
    * @param tol
    * @return
    */
-  double Twiddle(double tol);
+  double Twiddle(double tol, double mse);
+
+  void Next();
 
 private:
   double _prev_cte;
@@ -70,16 +73,32 @@ private:
 
   unsigned int _step_count;
 
-  double _dKp;
-  double _dKi;
-  double _dKd;
+  double _best_ever_mse;
 
+  unsigned int _input_state;
+
+  unsigned int _output_state;
+
+  unsigned int _params_index;
+
+  double _GetDpSum();
+
+  void _ScalePotentialChange(double scale, size_t index);
+
+  void _ProgressDescentDirection(double scale, size_t index);
+
+  /**
+   * Twiddle factor parameter sequence
+   */
+  unsigned int _twiddle_iter;
+
+  vector<double> _dp_vector;
+  vector<double> _p_vector;
   // Maximum and minimum allowable integrator state
   double _iMax;
 
   double _iMin;
 
-  double _store_error();
 };
 
 #endif /* PID_H */
