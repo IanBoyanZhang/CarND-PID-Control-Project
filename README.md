@@ -33,6 +33,17 @@ wobbling side to sid comparing to base line setup.
 A bang bang controller assumes linear model between steer angle and reverse torque (break) applied to vehicle when it approaching a 
 sharp corner. So that the car can leverage reduced orientation correction behavior to increase average speed.
 
+Current parameter:
+    
+    double _Kp = 0.15;
+    double _Ki = 0.25;
+    double _Kd = 0.004;
+
+Is tuned for more aggressive driving. If more conservative driving is required, same PID parameters setup with lower nominal throttle  value
+
+/**
+ *throttle_value = 0.3
+ */
 Reading List and references
 ---
 
