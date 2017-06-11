@@ -1,7 +1,6 @@
 #include <uWS/uWS.h>
 #include "json.hpp"
 #include "PID.h"
-#include <math.h>
 
 // for convenience
 using json = nlohmann::json;
@@ -82,8 +81,6 @@ int main(int argc, const char *argv[])
   cout << "Kp_s: " << _Kp_s << endl;
   cout << "Ki_s: " << _Ki_s << endl;
   cout << "Kd_s: " << _Kd_s << endl;*/
-
-
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
