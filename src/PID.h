@@ -38,7 +38,7 @@ public:
   /*
   * Update the PID error variables given cross track error.
   */
-  void UpdateError(double cte, clock_t dt);
+  void UpdateError(double cte, double dt);
 
   /*
   * Calculate the total PID error.
@@ -91,6 +91,7 @@ private:
 
   unsigned int _output_state;
 
+  // Kp Ki Kd iterator
   unsigned int _params_index;
 
   bool _is_minima;
@@ -100,9 +101,6 @@ private:
   void _ScalePotentialChange(double scale, size_t index);
 
   void _ProgressDescentDirection(double scale, size_t index);
-
-  // Kp Ki Kd iterator
-  unsigned int _twiddle_iter;
 
   vector<double> _dp_vector;
   vector<double> _p_vector;

@@ -59,7 +59,7 @@ void PID::InitPotentialChange(double dKp, double dKi, double dKd) {
   _dp_vector.push_back(dKd);
 }
 
-void PID::UpdateError(double cte, clock_t dt) {
+void PID::UpdateError(double cte, double dt) {
   p_error = cte;
   i_error += cte * dt;
   d_error = (cte - _prev_cte)/dt;
@@ -135,20 +135,20 @@ double PID::Twiddle(double tol, double mse) {
       // dp *= 1.1
       _ScalePotentialChange(1.1, _params_index);
       // Progress to next parameter tuning
-      _twiddle_iter = (_twiddle_iter + 1) % 3;
+      _params_index = (_params_index + 1) % 3;
       _input_state = 1;
       break;
     case 2:
       // dp *= 0.9
       _ScalePotentialChange(0.9, _params_index);
       // Progress to next parameter tuning
-      _twiddle_iter = (_twiddle_iter + 1) % 3;
+      _params_index = (_params_index + 1) % 3;
       _input_state = 1;
       break;
     case 3:
       _input_state = 2;
       // Progress to next parameter for tuning
-      _twiddle_iter = (_twiddle_iter + 1) % 3;
+      _params_index = (_params_index + 1) % 3;
       break;
     default:
       cout << "Error twiddle output state" << endl;

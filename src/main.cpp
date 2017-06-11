@@ -32,8 +32,8 @@ std::string hasData(std::string s) {
  */
 unsigned int step_counter = 0;
 unsigned int STEPS_THRESHOLD = 500;
-clock_t prev_time;
-clock_t curr_time;
+double prev_time;
+double curr_time;
 double tol = 0.2;
 
 void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
@@ -41,7 +41,7 @@ void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
   ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 }
 
-double getTimeDiff(clock_t prev_time, clock_t curr_time) {
+double getTimeDiff(double prev_time, double curr_time) {
   return (curr_time - prev_time)/CLOCKS_PER_SEC;
 }
 
@@ -68,7 +68,9 @@ int main(int argc, const char *argv[])
   // MPH from simulator
   double target_speed = 30;
 
-  if (argc != 8) {
+  bool use_twiddle = false;
+
+  if (argc != 9) {
     cout << "Now running with default parameters" << endl;
   } else {
     _Kp = strtod(argv[1], NULL);
@@ -78,7 +80,10 @@ int main(int argc, const char *argv[])
     _Ki_s = strtod(argv[5], NULL);
     _Kd_s = strtod(argv[6], NULL);
 
-    target_speed = strtod(argv[7], NULL);*/
+    target_speed = strtod(argv[7], NULL);
+    // True non zero
+    use_twiddle = strtod(argv[8], NULL);
+    */
   }
   pid.Init(_Kp, _Ki, _Kd);
   pid.InitPotentialChange(1, 1, 1);
@@ -122,8 +127,13 @@ int main(int argc, const char *argv[])
            * PID control
            *************************************************************************/
           curr_time = clock();
-          clock_t dt = getTimeDiff(prev_time, curr_time);
+          double dt = getTimeDiff(prev_time, curr_time);
+/*          if (dt == 0) {
+            dt = 0.1;
+          }*/
           prev_time = curr_time;
+
+          cout << "dt:" << dt << endl;
 
           pid.UpdateError(cte, dt);
           steer_value = pid.Control(1);
@@ -132,7 +142,7 @@ int main(int argc, const char *argv[])
           /*************************************************************************
            * Twiddle Loop
            *************************************************************************/
-          if (step_counter >= STEPS_THRESHOLD) {
+/*          if (step_counter >= STEPS_THRESHOLD) {
             pid.Twiddle(tol, pid.GetMSE());
             vector<double> p_vector = pid.GetP();
             vector<double> dp_vector = pid.GetDp();
@@ -147,7 +157,7 @@ int main(int argc, const char *argv[])
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
             }
-          }
+          }*/
           step_counter += 1;
 
           // DEBUG
