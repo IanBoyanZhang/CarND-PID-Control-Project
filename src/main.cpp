@@ -34,6 +34,11 @@ unsigned int STEPS_THRESHOLD = 500;
 
 double tol = 0.2;
 
+void reset_simulator(uWS::WebSocket<uWS::SERVER>& ws) {
+  std::string msg("42[\"reset\", {}]");
+  ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+}
+
 int main(int argc, const char *argv[])
 {
   uWS::Hub h;
@@ -119,6 +124,7 @@ int main(int argc, const char *argv[])
               pid.Init(p_vector[0], p_vector[1], p_vector[2]);
               pid.InitPotentialChange(dp_vector[0], dp_vector[1], dp_vector[2]);
               // reset simulator
+              reset_simulator(ws);
             } else {
               std::cout << "Reach minima -> P" << p_vector[0] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
