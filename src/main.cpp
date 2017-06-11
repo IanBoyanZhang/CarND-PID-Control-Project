@@ -27,6 +27,14 @@ std::string hasData(std::string s) {
   return "";
 }
 
+/**
+ * Global variables for control twiddle loop
+ */
+unsigned int step_counter = 0;
+unsigned int STEPS_THRESHOLD = 500;
+
+double tol = 0.2;
+
 int main(int argc, const char *argv[])
 {
   uWS::Hub h;
@@ -63,6 +71,7 @@ int main(int argc, const char *argv[])
     target_speed = strtod(argv[7], NULL);*/
   }
   pid.Init(_Kp, _Ki, _Kd);
+  pid.InitPotentialChange(1, 1, 1);
 
   cout << "Kp: " << _Kp << endl;
   cout << "Ki: " << _Ki << endl;
@@ -73,12 +82,6 @@ int main(int argc, const char *argv[])
   cout << "Kp_s: " << _Kp_s << endl;
   cout << "Ki_s: " << _Ki_s << endl;
   cout << "Kd_s: " << _Kd_s << endl;*/
-
-  bool cte_init = false;
-
-  /**
-   * Twiddle loop
-   */
 
 
 
@@ -105,18 +108,28 @@ int main(int argc, const char *argv[])
           * another PID controller to control the speed!
           */
 
-          if (!cte_init) {
-            pid.InitCTE(cte);
-            pid.InitPotentialChange(1, 1, 1);
-            cte_init = true;
-          }
-
           pid.UpdateError(cte);
           steer_value = pid.Control(1);
+          pid.Next();
 
           // Do twiddle
+          if (step_counter >= STEPS_THRESHOLD) {
+            pid.Twiddle(tol, pid.GetMSE());
+            vector<double> p_vector = pid.GetP();
+            vector<double> dp_vector = pid.GetDp();
+            if (!pid.ReachMinima()) {
+              step_counter = 0;
+              pid.Init(p_vector[0], p_vector[1], p_vector[2]);
+              pid.InitPotentialChange(dp_vector[0], dp_vector[1], dp_vector[2]);
+              // reset simulator
+            } else {
+              std::cout << "Reach minima -> P" << p_vector[0] << std::endl;
+              std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
+              std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
+            }
+          }
 
-          // next
+          step_counter += 1;
           /**
            * TODO: Steer value clamping
            */

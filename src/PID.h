@@ -62,7 +62,15 @@ public:
    */
   double Twiddle(double tol, double mse);
 
-  void Next();
+  double Next();
+
+  bool ReachMinima();
+
+  vector<double> GetP();
+
+  vector<double> GetDp();
+
+  void SetP(double Kp, double Ki, double Kd);
 
 private:
   double _prev_cte;
@@ -80,6 +88,8 @@ private:
   unsigned int _output_state;
 
   unsigned int _params_index;
+
+  bool _is_minima;
 
   double _GetDpSum();
 

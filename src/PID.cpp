@@ -7,10 +7,25 @@
 */
 
 PID::PID() {
+
+}
+
+PID::~PID() {}
+
+void PID::Init(double Kp, double Ki, double Kd) {
+/*  Kp = Kp;
+  Ki = Ki;
+  Kd = Kd;*/
+
+  SetP(Kp, Ki, Kd);
+
   _accu_error_sq = 0;
   _step_count = 0;
   _twiddle_iter = 0;
   _best_ever_mse = numeric_limits<double>::max();
+  _prev_cte = 0;
+
+  _is_minima = false;
 
   /**
    * input state
@@ -24,7 +39,7 @@ PID::PID() {
   /**
    * output state
    * 0 un-initialized
-   * 1 Uphill and progress
+   * 1 Uphill
    * 2 Downhill
    * 3 Reverse
    * Otherwise error state
@@ -37,18 +52,6 @@ PID::PID() {
    * 2: Kd
    */
   _params_index = 0;
-}
-
-PID::~PID() {}
-
-void PID::Init(double Kp, double Ki, double Kd) {
-/*  Kp = Kp;
-  Ki = Ki;
-  Kd = Kd;*/
-
-  _p_vector.push_back(Kp);
-  _p_vector.push_back(Ki);
-  _p_vector.push_back(Kd);
 }
 
 void PID::InitCTE(double cte) {
@@ -97,14 +100,17 @@ double PID::GetMSE(){
 double PID::Twiddle(double tol, double mse) {
   if (_GetDpSum() < tol) {
     _best_ever_mse = mse;
+    _is_minima = true;
     return _best_ever_mse;
   }
 
   switch (_input_state) {
     case 1:
+      // p += dp
       _ProgressDescentDirection(1, _params_index);
       break;
     case 2:
+      // p -= 2 * dp
       _ProgressDescentDirection(-2, _params_index);
       break;
     default:
@@ -114,6 +120,7 @@ double PID::Twiddle(double tol, double mse) {
 
   if (mse < _best_ever_mse) {
     _output_state = 1;
+    _best_ever_mse = mse;
   } else {
     switch (_input_state) {
       case 1:
@@ -130,12 +137,14 @@ double PID::Twiddle(double tol, double mse) {
 
   switch (_output_state) {
     case 1:
+      // dp *= 1.1
       _ScalePotentialChange(1.1, _params_index);
       // Progress to next parameter tuning
       _twiddle_iter = (_twiddle_iter + 1) % 3;
       _input_state = 1;
       break;
     case 2:
+      // dp *= 0.9
       _ScalePotentialChange(0.9, _params_index);
       // Progress to next parameter tuning
       _twiddle_iter = (_twiddle_iter + 1) % 3;
@@ -150,11 +159,16 @@ double PID::Twiddle(double tol, double mse) {
       cout << "Error twiddle output state" << endl;
   }
 
+  return _best_ever_mse;
 }
 
-void PID::Next() {
+/**
+ * Accumulate MSE
+ */
+double PID::Next() {
   _accu_error_sq += pow(TotalError(), 2);
   _step_count += 1;
+  return GetMSE();
 }
 
 double PID::_GetDpSum() {
@@ -170,4 +184,20 @@ void PID::_ProgressDescentDirection(double scale, size_t index) {
   _p_vector[index] += scale * _dp_vector[index];
 }
 
+bool PID::ReachMinima() {
+  return _is_minima;
+}
 
+vector<double> PID::GetP() {
+  return _p_vector;
+}
+
+vector<double> PID::GetDp() {
+  return _dp_vector;
+}
+
+void PID::SetP(double Kp, double Ki, double Kd) {
+  _p_vector.push_back(Kp);
+  _p_vector.push_back(Ki);
+  _p_vector.push_back(Kd);
+}
