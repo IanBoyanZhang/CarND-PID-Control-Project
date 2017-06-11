@@ -18,7 +18,7 @@ of trajectory than another.
 Parameters and Implementation
 ---
 
-A state machine based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
+A ![state machine](./state_machine.png) based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
  500 calls to accumulate enough Mean Squared Error for evaluating parameter search.
  
 Different from tuning approach introduced in classroom. dt is calculated for performing proper integral and differentiation. Without applying dt,
@@ -41,9 +41,22 @@ Current parameter:
 
 Is tuned for more aggressive driving. If more conservative driving is required, same PID parameters setup with lower nominal throttle  value
 
+
 /**
  *throttle_value = 0.3
  */
+
+Other thoughts
+-----------
+
+Some of car physical parameters configuration can be found here.
+
+[Car Params](https://github.com/udacity/self-driving-car-sim/blob/43c30490fd1230e387397139bc01432f020860ff/Assets/1_SelfDrivingCar/Prefabs/Car.prefab)
+
+Maybe we could do more control design in below approach?
+
+[Control PID](http://ctms.engin.umich.edu/CTMS/index.php?example=CruiseControl&section=ControlPID)
+
 Reading List and references
 ---
 
