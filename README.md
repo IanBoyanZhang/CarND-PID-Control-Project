@@ -18,7 +18,20 @@ of trajectory than another.
 Parameters and Implementation
 ---
 
-A state machine based twiddle tuner implementation can be found in PID class. 
+A state machine based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
+ 500 calls to accumulate enough Mean Squared Error for evaluating parameter search.
+ 
+Different from tuning approach introduced in classroom. dt is calculated for performing proper integral and differentiation. Without applying dt,
+
+The PID control is unstable. Even twiddle algorithm has potential in automated tuning process and may help finding good 
+baseline parameters, I ended tuning PID parameters.  A simple PI controller and a Bang Bang speed controller are also implemented()line 147 to 167)
+for velocity control.
+
+The final submission was made during aggressively reaching faster speed. So P term is reduced in order to reduce high frequency cross zero behavior like vehicle
+wobbling side to sid comparing to base line setup. 
+
+A bang bang controller assumes linear model between steer angle and reverse torque (break) applied to vehicle when it approaching a 
+sharp corner. So that the car can leverage reduced orientation correction behavior to increase average speed.
 
 Reading List and references
 ---

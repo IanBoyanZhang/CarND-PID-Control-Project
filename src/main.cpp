@@ -188,6 +188,7 @@ int main(int argc, const char *argv[])
                 // reset pid twiddle with other initial guess
                 pid.Init(_Kp, _Ki, _Kd);
                 pid.InitPotentialChange(0.9, 0.9, 0.9);
+                resetSimulator(ws);
               } else {
                 best_mse_so_far = pid.GetMSE();
               }
