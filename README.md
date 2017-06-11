@@ -1,8 +1,25 @@
 # CarND-Controls-PID
 
-
-
+PID
 ---
+
+This is classical PID control trajectory following project. 
+
+Proportional control is used to set up steering angle control. Proportional Control steers harder when vehicle is far away from
+desired trajectory defined by measurement of CTE (Cross Track Error). Roughly, higher gain of proportional control will provide faster 
+ system response, lower gain vice versa. By only relying on proportional control, vehicle will continuously overshoot the trajectory instead of following.
+
+To correct overshoot, CTE changing rate could be used, which is described in derivative term. This term can be visulized as resistance of 
+ pulling vehicle towards the trajectory.
+ 
+Integral term is introduced to counteract steady state error indicating if we are spending more time on one side
+of trajectory than another.
+
+Parameters and Implementation
+---
+
+A state machine based twiddle tuner implementation can be found in PID class. 
+
 Reading List and references
 ---
 

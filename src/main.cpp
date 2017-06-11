@@ -184,10 +184,12 @@ int main(int argc, const char *argv[])
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
 
-              if (pid.GetMSE() > best_mse_so_far) {
+              if (pid.GetMSE() >= best_mse_so_far) {
                 // reset pid twiddle with other initial guess
                 pid.Init(_Kp, _Ki, _Kd);
                 pid.InitPotentialChange(0.9, 0.9, 0.9);
+              } else {
+                best_mse_so_far = pid.GetMSE();
               }
             }
           }
