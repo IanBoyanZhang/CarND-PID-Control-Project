@@ -17,8 +17,11 @@ of trajectory than another.
 
 Parameters and Implementation
 ---
+ 
+A <img
+src='https://github.com/IanBoyanZhang/CarND-PID-Control-Project/blob/master/state_machine.png' width="270">
 
-A ![state machine](./state_machine.png) based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
+based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
  500 calls to accumulate enough Mean Squared Error for evaluating parameter search.
  
 Different from tuning approach introduced in classroom. dt is calculated for performing proper integral and differentiation. Without applying dt,
