@@ -12,10 +12,6 @@ PID::PID() {
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-/*  Kp = Kp;
-  Ki = Ki;
-  Kd = Kd;*/
-
   SetP(Kp, Ki, Kd);
 
   _accu_error_sq = 0;
@@ -23,6 +19,10 @@ void PID::Init(double Kp, double Ki, double Kd) {
   _twiddle_iter = 0;
   _best_ever_mse = numeric_limits<double>::max();
   _prev_cte = 0;
+
+  p_error = 0;
+  i_error = 0;
+  d_error = 0;
 
   _is_minima = false;
 
@@ -53,20 +53,16 @@ void PID::Init(double Kp, double Ki, double Kd) {
   _params_index = 0;
 }
 
-void PID::InitCTE(double cte) {
-  _prev_cte = cte;
-}
-
 void PID::InitPotentialChange(double dKp, double dKi, double dKd) {
   _dp_vector.push_back(dKp);
   _dp_vector.push_back(dKi);
   _dp_vector.push_back(dKd);
 }
 
-void PID::UpdateError(double cte) {
+void PID::UpdateError(double cte, clock_t dt) {
   p_error = cte;
-  i_error += cte; 
-  d_error = cte - _prev_cte;
+  i_error += cte * dt;
+  d_error = (cte - _prev_cte)/dt;
   _prev_cte = cte;
 }
 

@@ -1,4 +1,5 @@
 #include <uWS/uWS.h>
+#include <ctime>
 #include "json.hpp"
 #include "PID.h"
 
@@ -31,12 +32,17 @@ std::string hasData(std::string s) {
  */
 unsigned int step_counter = 0;
 unsigned int STEPS_THRESHOLD = 500;
-
+clock_t prev_time;
+clock_t curr_time;
 double tol = 0.2;
 
-void reset_simulator(uWS::WebSocket<uWS::SERVER>& ws) {
+void resetSimulator(uWS::WebSocket<uWS::SERVER>& ws) {
   std::string msg("42[\"reset\", {}]");
   ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+}
+
+double getTimeDiff(clock_t prev_time, clock_t curr_time) {
+  return (curr_time - prev_time)/CLOCKS_PER_SEC;
 }
 
 int main(int argc, const char *argv[])
@@ -50,9 +56,9 @@ int main(int argc, const char *argv[])
   /*************************************************************************
    * Initialize PID Coefficients
    *************************************************************************/
-  double _Kp = 0.0;
-  double _Ki = 1.0;
-  double _Kd = 0.0;
+  double _Kp = 0.2;
+  double _Ki = 0.3;
+  double _Kd = 0.004;
 
   // Speed controller
   double _Kp_s = 0.0;
@@ -87,6 +93,8 @@ int main(int argc, const char *argv[])
   cout << "Ki_s: " << _Ki_s << endl;
   cout << "Kd_s: " << _Kd_s << endl;*/
 
+  prev_time = clock();
+
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -110,11 +118,20 @@ int main(int argc, const char *argv[])
           * another PID controller to control the speed!
           */
 
-          pid.UpdateError(cte);
+          /*************************************************************************
+           * PID control
+           *************************************************************************/
+          curr_time = clock();
+          clock_t dt = getTimeDiff(prev_time, curr_time);
+          prev_time = curr_time;
+
+          pid.UpdateError(cte, dt);
           steer_value = pid.Control(1);
           pid.Next();
 
-          // Do twiddle
+          /*************************************************************************
+           * Twiddle Loop
+           *************************************************************************/
           if (step_counter >= STEPS_THRESHOLD) {
             pid.Twiddle(tol, pid.GetMSE());
             vector<double> p_vector = pid.GetP();
@@ -124,19 +141,15 @@ int main(int argc, const char *argv[])
               pid.Init(p_vector[0], p_vector[1], p_vector[2]);
               pid.InitPotentialChange(dp_vector[0], dp_vector[1], dp_vector[2]);
               // reset simulator
-              reset_simulator(ws);
+              resetSimulator(ws);
             } else {
               std::cout << "Reach minima -> P" << p_vector[0] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[1] << std::endl;
               std::cout << "Reach minima -> P" << p_vector[2] << std::endl;
             }
           }
-
           step_counter += 1;
-          /**
-           * TODO: Steer value clamping
-           */
-          
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 

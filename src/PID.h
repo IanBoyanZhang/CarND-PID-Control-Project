@@ -4,17 +4,13 @@
 #include <vector>
 #include <numeric>
 #include <cmath>
+#include <ctime>
 
 using namespace std;
 
 class PID {
 public:
-  /*
-  * Errors
-  */
-  double p_error;
-  double i_error;
-  double d_error;
+
 
   /*
   * Coefficients
@@ -38,14 +34,11 @@ public:
   */
   void Init(double Kp, double Ki, double Kd);
 
-  void InitCTE(double cte);
-
   void InitPotentialChange(double dKp, double dKi, double dKd);
-
   /*
   * Update the PID error variables given cross track error.
   */
-  void UpdateError(double cte);
+  void UpdateError(double cte, clock_t dt);
 
   /*
   * Calculate the total PID error.
@@ -74,6 +67,13 @@ public:
   void SetP(double Kp, double Ki, double Kd);
 
 private:
+  /*
+   * Errors
+   */
+  double p_error;
+  double i_error;
+  double d_error;
+
   double _prev_cte;
   /**
    * Accumulative factor over complete run
@@ -84,6 +84,9 @@ private:
 
   double _best_ever_mse;
 
+  /**
+   * Twiddle loop State Machine state variables
+   */
   unsigned int _input_state;
 
   unsigned int _output_state;
@@ -98,9 +101,7 @@ private:
 
   void _ProgressDescentDirection(double scale, size_t index);
 
-  /**
-   * Twiddle factor parameter sequence
-   */
+  // Kp Ki Kd iterator
   unsigned int _twiddle_iter;
 
   vector<double> _dp_vector;
