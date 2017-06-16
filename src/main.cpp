@@ -161,7 +161,7 @@ int main(int argc, const char *argv[])
            * In Final submission we are using this
            *************************************************************************/
           if (fabs(steer_value) >= 0.40) {
-            throttle_value = -  0.7 * steer_value;
+            throttle_value = -  0.7 * fabs(steer_value);
           } else {
             throttle_value = 1;
           }
