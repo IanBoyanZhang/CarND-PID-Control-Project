@@ -7,7 +7,7 @@ This is classical PID control trajectory following project.
 
 Proportional control is used to set up steering angle control. Proportional Control steers harder when vehicle is far away from
 desired trajectory defined by measurement of CTE (Cross Track Error). Roughly, higher gain of proportional control will provide faster 
- system response, lower gain vice versa. By only relying on proportional control, vehicle will continuously overshoot the trajectory instead of following.
+ system response, lower gain is vice versa. By only relying on proportional control, vehicle will continuously overshoot the trajectory instead of following.
 
 To correct overshoot, CTE changing rate could be used, which is described in derivative term. This term can be visulized as resistance of 
  pulling vehicle towards the trajectory.
@@ -18,17 +18,17 @@ of trajectory than another.
 Parameters and Implementation
 ---
  
-A state machine 
+A state machine based
 
 <img src='https://github.com/IanBoyanZhang/CarND-PID-Control-Project/blob/master/state_machine.png' width="270">
 
-based twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
+twiddle tuner implementation can be found in PID class. The simulator is reset after receiving every
  500 calls to accumulate enough Mean Squared Error for evaluating parameter search.
  
 Different from tuning approach introduced in classroom. dt is calculated for performing proper integral and differentiation. Without applying dt,
 
 The PID control is unstable. Even twiddle algorithm has potential in automated tuning process and may help finding good 
-baseline parameters, I ended tuning PID parameters.  A simple PI controller and a Bang Bang speed controller are also implemented()line 147 to 167)
+baseline parameters, I ended tuning PID parameters manually.  A simple PI controller and a Bang Bang speed controller are also implemented(line 147 to 167)
 for velocity control.
 
 The final submission was made during aggressively reaching faster speed. So P term is reduced in order to reduce high frequency cross zero behavior like vehicle
@@ -69,6 +69,8 @@ Reading List and references
 [How measure dt in simulator](https://discussions.udacity.com/t/how-to-make-the-pid-output-normalized-to-be-within-1-1/252173/5)
 
 [Application and Analysis of a Robust Trajectory Tracking Controller for Under-Characterized Autonomous Vehicles](http://www.meloneewise.com/wp-content/uploads/2015/08/trajectory_paper.pdf)
+
+[Control System bootcamp](https://www.youtube.com/watch?v=Pi7l8mMjYVE&list=PLMrJAkhIeNNR20Mz-VpzgfQs5zrYi085m)
 
 ## Dependencies
 
